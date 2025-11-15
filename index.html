@@ -67,4 +67,44 @@ document.getElementById("auto").onclick = () => {
   if(count >= 500){
     count -= 500;
     autoRate += 1;
-    alert("🤖 Auto-
+    alert("🤖 Auto-clicker hired! It works for minimum wage.");
+    update();
+  } else alert("❌ Need 500 points!");
+};
+
+// Multiplier
+document.getElementById("mult").onclick = () => {
+  if(count >= 1000){
+    count -= 1000;
+    multiplier += 1;
+    alert("⚡ Power LEVEL UP! Your clicks are stronger!");
+    update();
+  } else alert("❌ Need 1000 points!");
+};
+
+// Goose
+document.getElementById("goose").onclick = () => {
+  if(count >= 2500){
+    count -= 2500;
+    gooseCount += 1;
+    autoRate += 50;
+    alert("🦆 GOOSE ACQUIRED. It clicks out of anger.");
+    update();
+  } else alert("❌ Need 2500 points!");
+};
+
+// Auto-click loop
+setInterval(() => {
+  if(autoRate > 0){
+    count += autoRate;
+    update();
+  }
+}, 1000);
+
+// Load UI on startup
+update();
+</script>
+
+</body>
+</html>
+
