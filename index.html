@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Crazy Clicker</title>
+<style>
+  body { text-align: center; font-family: comic sans ms, sans-serif; background:#ffb3ff; }
+  #button { font-size: 50px; padding: 30px; margin-top: 100px; cursor:pointer; }
+  #count { font-size: 40px; margin-top:20px; }
+</style>
+</head>
+<body>
+
+<h1>🔥 CRAZY CLICKER 🔥</h1>
+<button id="button">CLICK ME 😈</button>
+<div id="count">Points: 0</div>
+
+<script>
+let count = 0;
+let chaos = 0;
+
+const button = document.getElementById("button");
+const countDisplay = document.getElementById("count");
+
+button.addEventListener("click", () => {
+  count += 1 + Math.floor(chaos / 10);
+  countDisplay.innerText = `Points: ${count}`;
+  
+  // Chaos effects
+  if (count % 20 === 0) {
+    document.body.style.background = "#" + Math.floor(Math.random()*16777215).toString(16);
+    button.style.transform = `rotate(${Math.random()*20 - 10}deg) scale(1.${Math.floor(Math.random()*5)+5})`;
+  }
+  
+  if (count % 100 === 0) {
+    alert("WHY ARE YOU STILL CLICKING??");
+    chaos++;
+  }
+});
+</script>
+
+</body>
+</html>
