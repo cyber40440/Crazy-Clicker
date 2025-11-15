@@ -31,4 +31,76 @@ let autoRate = 0;
 let multiplier = 1;
 
 const button = document.getElementById("button");
-const countDisplay =
+const countDisplay = document.getElementById("count");
+const shop = document.getElementById("shop");
+
+// Update game UI
+function update(){
+  countDisplay.innerText = `Points: ${count}`;
+
+  // Unlock shop at 100 points
+  if(count >= 100 && shop.style.display === "none"){
+    shop.style.display = "block";
+    alert("🛍️ SHOP UNLOCKED! Now you can waste points responsibly.");
+  }
+}
+
+// Clicking button adds points
+button.addEventListener("click", () => {
+  count += (1 + chaos) * multiplier;
+  update();
+
+  // Fun chaos effects
+  if(Math.random() < 0.05){
+    document.body.style.background = "#" + Math.floor(Math.random()*16777215).toString(16);
+  }
+});
+
+// Upgrade: Auto clicker
+document.getElementById("auto").onclick = () => {
+  if(count >= 500){
+    count -= 500;
+    autoRate += 1;
+    update();
+  } else {
+    alert("❌ You need 500 points!");
+  }
+};
+
+// Upgrade: Multiplier
+document.getElementById("mult").onclick = () => {
+  if(count >= 1000){
+    count -= 1000;
+    multiplier += 1;
+    update();
+  } else {
+    alert("❌ You need 1000 points!");
+  }
+};
+
+// Angry Goose
+document.getElementById("goose").onclick = () => {
+  if(count >= 2500){
+    count -= 2500;
+    autoRate += 50;
+    alert("🦆 AN ANGRY GOOSE HAS JOINED YOU. It screams while clicking.");
+    update();
+  } else {
+    alert("❌ You need 2500 points!");
+  }
+};
+
+// Auto clicking loop
+setInterval(() => {
+  if(autoRate > 0){
+    count += autoRate;
+    update();
+  }
+}, 1000);
+
+update();
+</script>
+
+</body>
+</html>
+
