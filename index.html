@@ -3,11 +3,14 @@
 <head>
 <title>Crazy Clicker</title>
 <style>
-  body { text-align: center; font-family: comic sans ms, sans-serif; background:#bb2f74; }
-  #button { font-size: 50px; padding: 30px; margin-top: 30px; cursor:pointer; }
+  body { text-align: center; font-family: comic sans ms, sans-serif; background:#bb2f74; color: white; }
+  h1 { text-shadow: 2px 2px #000; }
+  #button { font-size: 50px; padding: 30px; margin-top: 30px; cursor:pointer; background-color: #f7b731; border: 5px solid #d9990b; border-radius: 10px; color: black; }
   #count { font-size: 40px; margin-top:20px; }
+  #stats { margin-top: 10px; font-size: 20px; background: #962560; padding: 10px; border-radius: 5px; display: inline-block; }
   .shop { margin-top: 40px; font-size: 24px; display:none; }
-  button.upg { margin:10px; padding:10px; font-size:20px; cursor:pointer; }
+  button.upg { margin:10px; padding:10px; font-size:20px; cursor:pointer; background-color: #38b44a; border: 3px solid #288435; border-radius: 5px; color: white; transition: background-color 0.1s; }
+  button.upg:disabled { background-color: #aaa; cursor: not-allowed; border: 3px solid #777; }
 </style>
 </head>
 <body>
@@ -16,88 +19,166 @@
 <button id="button">CLICK ME 😈</button>
 <div id="count">Points: 0</div>
 
-<!-- SHOP -->
+<div id="stats">
+    <p>⚡ **Per Click:** <span id="mult-stat">1</span></p>
+    <p>🤖 **Auto Clicks/s:** <span id="auto-stat">0</span></p>
+    <p>🦆 **Angry Geese:** <span id="goose-stat">0</span></p>
+</div>
 <div class="shop" id="shop">
   <h2>🛒 Upgrades</h2>
-  <button class="upg" id="auto">Buy Auto-Clicker (Cost: 500)</button>
-  <button class="upg" id="mult">Buy Click Multiplier (Cost: 1000)</button>
-  <button class="upg" id="goose">Buy Angry Goose (Cost: 2500)</button>
+  <button class="upg" id="auto">Buy Auto-Clicker (Cost: <span id="auto-cost">500</span>)</button>
+  <button class="upg" id="mult">Buy Click Multiplier (Cost: <span id="mult-cost">1000</span>)</button>
+  <button class="upg" id="goose">Buy Angry Goose (Cost: <span id="goose-cost">2500</span>)</button>
 </div>
 
 <script>
-// ----------- LOAD SAVED DATA ----------
+// ----------- INITIAL/SAVED GAME DATA ----------
 let count = parseInt(localStorage.getItem("crazyPoints")) || 0;
 let autoRate = parseInt(localStorage.getItem("crazyAuto")) || 0;
 let multiplier = parseInt(localStorage.getItem("crazyMult")) || 1;
 let gooseCount = parseInt(localStorage.getItem("crazyGeese")) || 0;
 let shopUnlocked = localStorage.getItem("shopUnlocked") === "true";
 
+// Base costs - these are now the initial costs
+const BASE_AUTO_COST = 500;
+const BASE_MULT_COST = 1000;
+const BASE_GOOSE_COST = 2500;
+
+// Dynamic costs - these will change as upgrades are bought
+let autoCost = parseInt(localStorage.getItem("autoCurrentCost")) || BASE_AUTO_COST;
+let multCost = parseInt(localStorage.getItem("multCurrentCost")) || BASE_MULT_COST;
+let gooseCost = parseInt(localStorage.getItem("gooseCurrentCost")) || BASE_GOOSE_COST;
+
+
+// ----------- DOM ELEMENTS ----------
 const button = document.getElementById("button");
 const countDisplay = document.getElementById("count");
 const shop = document.getElementById("shop");
 
-// ----------- UPDATE SCREEN ----------
-function update(){
+// Upgrade Buttons
+const autoBtn = document.getElementById("auto");
+const multBtn = document.getElementById("mult");
+const gooseBtn = document.getElementById("goose");
+
+// Stat Displays
+const multStat = document.getElementById("mult-stat");
+const autoStat = document.getElementById("auto-stat");
+const gooseStat = document.getElementById("goose-stat");
+
+// Cost Spans
+const autoCostDisplay = document.getElementById("auto-cost");
+const multCostDisplay = document.getElementById("mult-cost");
+const gooseCostDisplay = document.getElementById("goose-cost");
+
+
+// ----------- CORE LOGIC FUNCTIONS ----------
+
+/**
+ * Updates the UI elements based on current game state.
+ */
+function updateUI(){
+  // 1. Update Points Display
   countDisplay.innerText = `Points: ${count}`;
 
-  // Unlock shop if enough points OR was already unlocked
+  // 2. Update Stats Display
+  multStat.innerText = multiplier;
+  // autoRate is the total Clicks Per Second (CPS)
+  autoStat.innerText = autoRate; 
+  gooseStat.innerText = gooseCount;
+
+  // 3. Update Shop Visibility
   if(count >= 100 || shopUnlocked){
     shopUnlocked = true;
     shop.style.display = "block";
     localStorage.setItem("shopUnlocked", "true");
   }
+  
+  // 4. Update Shop Buttons (Costs and Disabled State)
+  // Update button costs
+  autoCostDisplay.innerText = autoCost;
+  multCostDisplay.innerText = multCost;
+  gooseCostDisplay.innerText = gooseCost;
 
-  // Save everything
+  // Disable buttons if user cannot afford them
+  autoBtn.disabled = count < autoCost;
+  multBtn.disabled = count < multCost;
+  gooseBtn.disabled = count < gooseCost;
+}
+
+/**
+ * Saves all game data to localStorage.
+ */
+function saveGame(){
   localStorage.setItem("crazyPoints", count);
   localStorage.setItem("crazyAuto", autoRate);
   localStorage.setItem("crazyMult", multiplier);
   localStorage.setItem("crazyGeese", gooseCount);
+  
+  // Save dynamic costs
+  localStorage.setItem("autoCurrentCost", autoCost);
+  localStorage.setItem("multCurrentCost", multCost);
+  localStorage.setItem("gooseCurrentCost", gooseCost);
 }
 
-// ----------- CLICK TO EARN ----------
+/**
+ * Combines UI update and saving. This is the main function to call after any game state change.
+ */
+function update(){
+  updateUI();
+  saveGame();
+}
+
+// ----------- EVENT LISTENERS AND LOOPS ----------
+
+// Click to earn
 button.addEventListener("click", () => {
   count += multiplier;
   update();
 });
 
-// ----------- SHOP ITEMS --------------
-
 // Auto Clicker
-document.getElementById("auto").onclick = () => {
-  if(count >= 500){
-    count -= 500;
+autoBtn.onclick = () => {
+  if(count >= autoCost){
+    count -= autoCost;
     autoRate += 1;
+    // Increase cost for the next purchase (e.g., 20% increase)
+    autoCost = Math.ceil(autoCost * 1.2); 
     alert("🤖 Auto-clicker hired! It works for minimum wage.");
     update();
-  } else alert("❌ Need 500 points!");
+  } else alert("❌ Need " + autoCost + " points!");
 };
 
 // Multiplier
-document.getElementById("mult").onclick = () => {
-  if(count >= 1000){
-    count -= 1000;
+multBtn.onclick = () => {
+  if(count >= multCost){
+    count -= multCost;
     multiplier += 1;
+    // Increase cost for the next purchase
+    multCost = Math.ceil(multCost * 2);
     alert("⚡ Power LEVEL UP! Your clicks are stronger!");
     update();
-  } else alert("❌ Need 1000 points!");
+  } else alert("❌ Need " + multCost + " points!");
 };
 
 // Goose
-document.getElementById("goose").onclick = () => {
-  if(count >= 2500){
-    count -= 2500;
+gooseBtn.onclick = () => {
+  if(count >= gooseCost){
+    count -= gooseCost;
     gooseCount += 1;
-    autoRate += 50;
+    // Each goose adds 50 to the autoRate
+    autoRate += 50; 
+    // Increase cost for the next goose
+    gooseCost = Math.ceil(gooseCost * 1.5);
     alert("🦆 GOOSE ACQUIRED. It clicks out of anger.");
     update();
-  } else alert("❌ Need 2500 points!");
+  } else alert("❌ Need " + gooseCost + " points!");
 };
 
-// Auto-click loop
+// Auto-click loop (runs every 1 second)
 setInterval(() => {
   if(autoRate > 0){
     count += autoRate;
-    update();
+    update(); // Update the UI/Save game every second when auto-clicking is active
   }
 }, 1000);
 
@@ -107,4 +188,3 @@ update();
 
 </body>
 </html>
-
