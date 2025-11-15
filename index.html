@@ -3,7 +3,7 @@
 <head>
 <title>Crazy Clicker</title>
 <style>
-  body { text-align: center; font-family: comic sans ms, sans-serif; background:#ff7cf7; }
+  body { text-align: center; font-family: comic sans ms, sans-serif; background:#bb2f74; }
   #button { font-size: 50px; padding: 30px; margin-top: 30px; cursor:pointer; }
   #count { font-size: 40px; margin-top:20px; }
   .shop { margin-top: 40px; font-size: 24px; display:none; }
@@ -25,82 +25,46 @@
 </div>
 
 <script>
-let count = 0;
-let chaos = 0;
-let autoRate = 0;
-let multiplier = 1;
+// ----------- LOAD SAVED DATA ----------
+let count = parseInt(localStorage.getItem("crazyPoints")) || 0;
+let autoRate = parseInt(localStorage.getItem("crazyAuto")) || 0;
+let multiplier = parseInt(localStorage.getItem("crazyMult")) || 1;
+let gooseCount = parseInt(localStorage.getItem("crazyGeese")) || 0;
+let shopUnlocked = localStorage.getItem("shopUnlocked") === "true";
 
 const button = document.getElementById("button");
 const countDisplay = document.getElementById("count");
 const shop = document.getElementById("shop");
 
-// Update game UI
+// ----------- UPDATE SCREEN ----------
 function update(){
   countDisplay.innerText = `Points: ${count}`;
 
-  // Unlock shop at 100 points
-  if(count >= 100 && shop.style.display === "none"){
+  // Unlock shop if enough points OR was already unlocked
+  if(count >= 100 || shopUnlocked){
+    shopUnlocked = true;
     shop.style.display = "block";
-    alert("🛍️ SHOP UNLOCKED! Now you can waste points responsibly.");
+    localStorage.setItem("shopUnlocked", "true");
   }
+
+  // Save everything
+  localStorage.setItem("crazyPoints", count);
+  localStorage.setItem("crazyAuto", autoRate);
+  localStorage.setItem("crazyMult", multiplier);
+  localStorage.setItem("crazyGeese", gooseCount);
 }
 
-// Clicking button adds points
+// ----------- CLICK TO EARN ----------
 button.addEventListener("click", () => {
-  count += (1 + chaos) * multiplier;
+  count += multiplier;
   update();
-
-  // Fun chaos effects
-  if(Math.random() < 0.05){
-    document.body.style.background = "#" + Math.floor(Math.random()*16777215).toString(16);
-  }
 });
 
-// Upgrade: Auto clicker
+// ----------- SHOP ITEMS --------------
+
+// Auto Clicker
 document.getElementById("auto").onclick = () => {
   if(count >= 500){
     count -= 500;
     autoRate += 1;
-    update();
-  } else {
-    alert("❌ You need 500 points!");
-  }
-};
-
-// Upgrade: Multiplier
-document.getElementById("mult").onclick = () => {
-  if(count >= 1000){
-    count -= 1000;
-    multiplier += 1;
-    update();
-  } else {
-    alert("❌ You need 1000 points!");
-  }
-};
-
-// Angry Goose
-document.getElementById("goose").onclick = () => {
-  if(count >= 2500){
-    count -= 2500;
-    autoRate += 50;
-    alert("🦆 AN ANGRY GOOSE HAS JOINED YOU. It screams while clicking.");
-    update();
-  } else {
-    alert("❌ You need 2500 points!");
-  }
-};
-
-// Auto clicking loop
-setInterval(() => {
-  if(autoRate > 0){
-    count += autoRate;
-    update();
-  }
-}, 1000);
-
-update();
-</script>
-
-</body>
-</html>
-
+    alert("🤖 Auto-
