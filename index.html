@@ -6,8 +6,8 @@
   body { text-align: center; font-family: comic sans ms, sans-serif; background:#ff7cf7; }
   #button { font-size: 50px; padding: 30px; margin-top: 30px; cursor:pointer; }
   #count { font-size: 40px; margin-top:20px; }
-  .shop { margin-top: 40px; font-size: 24px; }
-  button.upg { margin:10px; padding:10px; font-size:20px; }
+  .shop { margin-top: 40px; font-size: 24px; display:none; }
+  button.upg { margin:10px; padding:10px; font-size:20px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -16,102 +16,19 @@
 <button id="button">CLICK ME 😈</button>
 <div id="count">Points: 0</div>
 
-<div class="shop">
+<!-- SHOP -->
+<div class="shop" id="shop">
   <h2>🛒 Upgrades</h2>
-  <button class="upg" id="auto">Buy Auto-Clicker (Cost: 50)</button>
-  <button class="upg" id="mult">Buy Click Multiplier (Cost: 100)</button>
-  <button class="upg" id="goose">Buy Angry Goose (Cost: 1000)</button>
+  <button class="upg" id="auto">Buy Auto-Clicker (Cost: 500)</button>
+  <button class="upg" id="mult">Buy Click Multiplier (Cost: 1000)</button>
+  <button class="upg" id="goose">Buy Angry Goose (Cost: 2500)</button>
 </div>
 
-<button id="prestige" style="display:none; margin-top:30px; font-size:30px; padding:20px;">⭐ PRESTIGE ⭐</button>
-
 <script>
-let count = parseInt(localStorage.getItem("crazyCount")) || 0;
-let chaos = parseInt(localStorage.getItem("crazyPrestige")) || 0;
+let count = 0;
+let chaos = 0;
 let autoRate = 0;
 let multiplier = 1;
 
-const sounds = [
-  "BONK.mp3", "quack.mp3", "boing.mp3", "ding.mp3"
-];
-
 const button = document.getElementById("button");
-const countDisplay = document.getElementById("count");
-const prestigeBtn = document.getElementById("prestige");
-
-function playSound(){
-  const audio = new Audio();
-  if(Math.random() < 0.01) audio.src = "AIRHORN.mp3";
-  else audio.src = sounds[Math.floor(Math.random()*sounds.length)];
-  audio.volume = 0.4;
-  audio.play();
-}
-
-function update(){
-  countDisplay.innerText = `Points: ${count}`;
-  localStorage.setItem("crazyCount", count);
-  
-  if(count >= 50000){
-    prestigeBtn.style.display = "block";
-  }
-}
-
-button.addEventListener("click", () => {
-  count += (1 + chaos) * multiplier;
-  playSound();
-  update();
-
-  if(Math.random() < 0.05){
-    document.body.style.background = "#" + Math.floor(Math.random()*16777215).toString(16);
-  }
-
-  if(Math.random() < 0.02){
-    alert("A random goose honks at you for no reason.");
-  }
-});
-
-document.getElementById("auto").onclick = () => {
-  if(count >= 50){
-    count -= 50;
-    autoRate += 1;
-    update();
-  }
-};
-
-document.getElementById("mult").onclick = () => {
-  if(count >= 100){
-    count -= 100;
-    multiplier += 1;
-    update();
-  }
-};
-
-document.getElementById("goose").onclick = () => {
-  if(count >= 1000){
-    count -= 1000;
-    autoRate += 50;
-    alert("🦆 A VERY ANGRY GOOSE JOINS YOU. It clicks angrily.");
-    update();
-  }
-};
-
-setInterval(() => {
-  count += autoRate * (1 + chaos);
-  update();
-}, 1000);
-
-prestigeBtn.onclick = () => {
-  if(count >= 50000){
-    chaos += 1;
-    localStorage.setItem("crazyPrestige", chaos);
-    count = 0;
-    alert(`⭐ PRESTIGE ACHIEVED ⭐\nYou now break physics ×${chaos}!`);
-    update();
-  }
-};
-
-update();
-</script>
-
-</body>
-</html>
+const countDisplay =
